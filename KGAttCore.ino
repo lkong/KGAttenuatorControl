@@ -1,11 +1,13 @@
 
-
-#define SPI_CLK 10
-#define SPI_MOSI 9
-#define DATTN_CS 6
-#define ENCODER_LEFT 2
-#define ENCODER_RIGHT 3
-#define ENCODER_CLICK 4
+//Clock pin
+#define SPI_CLK 1
+//DIN pin on Attenuator board
+#define SPI_MOSI 2
+//Device select pin, CS* on Attenuator board
+#define DATTN_CS 0
+#define ENCODER_LEFT 4
+#define ENCODER_RIGHT 5
+#define ENCODER_CLICK 6
 
 #include <Wire.h>
 #include "Font.h"
@@ -56,32 +58,6 @@ void setup()
   myEncoder.setPosition(0);
   myEncoder.setRate(0.25f);
   myEncoder.setIntegerMode(true);
-
-  //delay(500);
-
-
-//  dattnSPI.SendCommand(0x10);
-//  delay(6);
-//  dattnSPI.SendCommand(0x00);
-//  delay(6);
-
-//  dattnSPI.SendCommand(0x20);
-//  delay(6);
-//  dattnSPI.SendCommand(0x00);
-//  delay(6);
-//
-//  dattnSPI.SendCommand(0x40);
-//  delay(6);
-//  dattnSPI.SendCommand(0x00);
-//  delay(6);
-//
-//  dattnSPI.SendCommand(0x80);
-//  delay(6);
-//  dattnSPI.SendCommand(0x00);
-//  delay(6);
-
-
-  //AttnSetup();
 
 }
 
