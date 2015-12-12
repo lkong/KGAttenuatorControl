@@ -5,6 +5,13 @@
 #define SPI_MOSI 2
 //Device select pin, CS* on Attenuator board
 #define DATTN_CS 0
+
+//NeoPixel ring pin
+#define PIXEL_PIN 10
+
+//NeoPixel number
+#define PIXEL_COUNT 24
+
 #define ENCODER_LEFT 4
 #define ENCODER_RIGHT 5
 #define ENCODER_CLICK 6
@@ -13,6 +20,7 @@
 #include "Font.h"
 #include "DATTN.h"
 #include "Encoder.h"
+#include "Adafruit_NeoPixel.h"
 
 //  Attenuator controls
 const byte attSetAddr = 0x38;
@@ -21,17 +29,44 @@ const int offVolume = 100;
 const int relayLatchTime = 3;    //  time in milliseconds
 int newVol = offVolume ;
 
+const int encoderMin=1;
+const int encoderMax=100;
+
+const int default_led_brightness = 100;
+
+const int number_of_inputs = 4;
+int current_input=0;
+
+struct RGB{
+    int R;
+    int G;
+    int B;
+
+}
+struct RGB inputRGBs[number_of_inputs];
+
 DATTN dattnSPI(SPI_MOSI, SPI_CLK, DATTN_CS);
+
 
 Encoder myEncoder(ENCODER_LEFT,ENCODER_RIGHT,ENCODER_CLICK);
 float newData = 0.0f;
 
 void EncoderMoveInterrupt() { myEncoder.lowLevelTick(); Serial.println("tick"); }
 void EncoderClickInterrupt() { myEncoder.lowLevelClick(); }
+Adafruit_NeoPixel ring=Adafruit_NeoPixel(PIXEL_COUNT,PIXEL_PIN, NEO_RGB + NEO_KHZ800);
 
+void initInputRGBs()
+{
+    inputRGBs[0]={255,0,0};
+    inputRGBs[1]={100,255,0};
+    inputRGBs[2]={0,0,255};
+    inputRGBs[3]={0,255,100};
+}
 //==========================================================//
 void setup()
 {
+  // for NeoPixel ring
+  NeoPixelRingSetup();
   /*  for encoder  */
   Serial.begin(38400);
 
@@ -48,13 +83,7 @@ void setup()
   }
   delay(2000);
 
-
-
-//  attachInterrupt(2,EncoderMoveInterrupt,CHANGE);
-//  attachInterrupt(3,EncoderMoveInterrupt,CHANGE);
-//  attachInterrupt(4,EncoderClickInterrupt,CHANGE);
-
-  myEncoder.setMinMax(1,100);
+  myEncoder.setMinMax(encoderMin,encoderMax);
   myEncoder.setPosition(0);
   myEncoder.setRate(0.25f);
   myEncoder.setIntegerMode(true);
@@ -67,22 +96,6 @@ void loop()
   unsigned int v;
   String string1;
 
-  //dattnSPI.SetVolume(0x1000);
-
-//  if (myEncoder.hasChanged())
-//  {
-//    newData = myEncoder.getPosition();
-//    Serial.print("> Position: ");
-//    Serial.println(newData);
-//
-//    SetVolume((int)newData);
-//
-//  }
-//  if (myEncoder.hasClick()) Serial.println("! Click !");
-//  if (myEncoder.onClickHold()) { Serial.println(" ... Holding ..."); delay(500); }
-
-
-
   if (myEncoder.tick())
   {
     newData = myEncoder.getPosition();
@@ -94,6 +107,29 @@ void loop()
     SetVolume((int)newData);
   }
 
+}
+
+void NeoPixelRingSetup()
+{
+  initInputRGBs();
+  ring.begin();
+  ring.setBrigthness(default_led_brightness);
+  ring.show();
+}
+
+void setNeoPixelRingVol(int newVol)
+{
+    int number_of_leds_on={int)PIXEL_COUNT*newVol/encoderMax;
+    for (int i=0;i<number_of_leds_on-1;i++)
+    {
+        ring.setPixelColor(i,initInputRGBs[current_input].R,initInputRGBs[current_input].G,initInputRGBs[current_input].B);
+    }
+    ring.setPixelColor(number_of_leds_on-1,255,255,255);
+}
+
+void nextNeoPixelRingCol()
+{
+    current_input=(current_input+1)%number_of_inputs;
 }
 
 
