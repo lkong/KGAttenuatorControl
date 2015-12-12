@@ -101,10 +101,15 @@ void loop()
     newData = myEncoder.getPosition();
     Serial.print("> Position: ");
     Serial.println(newData);
-    if (myEncoder.hasClick()) Serial.println("! Click !");
+    if (myEncoder.hasClick())
+    {
+        Serial.println("! Click !");
+        NextNeoPixelRingCol();
+    }
     if (myEncoder.onClickHold()) { Serial.println(" ... Holding ..."); delay(500); }
 
     SetVolume((int)newData);
+    SetNeoPixelRingVol((int)newData);
   }
 
 }
@@ -117,7 +122,7 @@ void NeoPixelRingSetup()
   ring.show();
 }
 
-void setNeoPixelRingVol(int newVol)
+void SetNeoPixelRingVol(int newVol)
 {
     int number_of_leds_on={int)PIXEL_COUNT*newVol/encoderMax;
     for (int i=0;i<number_of_leds_on-1;i++)
@@ -125,9 +130,10 @@ void setNeoPixelRingVol(int newVol)
         ring.setPixelColor(i,initInputRGBs[current_input].R,initInputRGBs[current_input].G,initInputRGBs[current_input].B);
     }
     ring.setPixelColor(number_of_leds_on-1,255,255,255);
+    ring.show();
 }
 
-void nextNeoPixelRingCol()
+void NextNeoPixelRingCol()
 {
     current_input=(current_input+1)%number_of_inputs;
 }
